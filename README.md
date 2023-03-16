@@ -17,7 +17,7 @@ Flags:
   -i, --in string    path to import files from
   -o, --out string   path to export files to
   -v, --version      version for isokinexp
-  ```
+```
 
 To import files from an input path to an output path:
 
