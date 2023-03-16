@@ -2,7 +2,7 @@
 [![Build + Test](https://github.com/behringer24/isokinexp/actions/workflows/go.yml/badge.svg)](https://github.com/behringer24/isokinexp/actions/workflows/go.yml)
 [![Release build](https://github.com/behringer24/isokinexp/actions/workflows/release.yml/badge.svg)](https://github.com/behringer24/isokinexp/actions/workflows/release.yml)
 
-isokinexp is a command to import export files from isokinetic measuring devices.
+isokinexp is a command line tool to import/export/sort files from isokinetic measuring devices from Ferstl like the Isomed 2000.
 
 # Basic usage
 
