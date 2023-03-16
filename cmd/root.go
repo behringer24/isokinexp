@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -18,11 +19,12 @@ import (
 var (
 	srcPath  string
 	destPath string
+	moveFile bool
 
 	rootCmd = &cobra.Command{
 		Use:     "isokinexp",
 		Short:   "Exporter / renamer for isokinetic device files",
-		Version: "0.0.2",
+		Version: "0.0.3",
 		Long:    `isokinexp is a command to import export files from isokinetic measureing devices.`,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
@@ -32,8 +34,35 @@ var (
 	}
 )
 
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func copy() {
-	fmt.Printf("Copy files from %s to %s\n", srcPath, destPath)
+	var count int = 0
+
+	if moveFile {
+		fmt.Printf("Move files from %s to %s\n", srcPath, destPath)
+	} else {
+		fmt.Printf("Copy files from %s to %s\n", srcPath, destPath)
+	}
 
 	// Read all files from the source directory
 	files, err := ioutil.ReadDir(srcPath)
@@ -76,7 +105,7 @@ func copy() {
 			}
 
 			// Create the destination directory based on the filename and date information
-			destSubdir := filepath.Join(destPath, date)
+			destSubdir := filepath.Join(destPath, name)
 			err = os.MkdirAll(destSubdir, 0755)
 			if err != nil {
 				fmt.Printf("Error creating destination directory %s: %v\n", destSubdir, err)
@@ -84,18 +113,30 @@ func copy() {
 			}
 
 			// Rename and move the file to the destination directory
-			newName := fmt.Sprintf("%s_%s.txt", name, strings.ReplaceAll(date, "-", ""))
-			err = os.Rename(filepath.Join(srcPath, file.Name()), filepath.Join(destSubdir, newName))
-			if err != nil {
-				fmt.Printf("Error moving file %s: %v\n", file.Name(), err)
-				continue
-			}
+			newName := filepath.Join(destSubdir, fmt.Sprintf("%s_%s.txt", name, date))
 
-			fmt.Printf("File %s moved to %s\n", file.Name(), filepath.Join(destSubdir, newName))
+			if moveFile {
+				err = os.Rename(filepath.Join(srcPath, file.Name()), newName)
+				if err != nil {
+					fmt.Printf("Error moving file %s: %v\n", file.Name(), err)
+					continue
+				}
+				fmt.Printf("File %s moved to %s\n", file.Name(), newName)
+				count++
+			} else {
+				err = copyFile(filepath.Join(srcPath, file.Name()), newName)
+				if err != nil {
+					fmt.Printf("Error copying file %s: %v\n", file.Name(), err)
+					continue
+				}
+				fmt.Printf("File %s copied to %s\n", file.Name(), newName)
+				count++
+			}
 		} else {
 			fmt.Printf("Skip %s\n", file.Name())
 		}
 	}
+	fmt.Printf("%d files copied/moved\n", count)
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -118,7 +159,7 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().StringVarP(&srcPath, "in", "i", "", "path to import files from")
 	rootCmd.Flags().StringVarP(&destPath, "out", "o", "", "path to export files to")
-	rootCmd.Flags().BoolP("delete", "d", false, `delete source files from input directory.
+	rootCmd.Flags().BoolVarP(&moveFile, "delete", "d", false, `delete source files from input directory.
 isokinexp will move files instead of copying`)
 
 	rootCmd.MarkFlagRequired("in")
