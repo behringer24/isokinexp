@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         # build and publish in parallel: linux/amd64
-        goos: [linux]
-        goarch: [amd64]
+        goos: [windows, linux]
+        goarch: [amd64, "386"]
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
