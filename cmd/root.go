@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -24,7 +21,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:     "isokinexp",
 		Short:   "Exporter / renamer for isokinetic device files",
-		Version: "0.0.3",
+		Version: "0.0.4",
 		Long:    `isokinexp is a command to import export files from isokinetic measureing devices.`,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
@@ -73,11 +70,12 @@ func copy() {
 	// Define regular expression patterns to match the filename and date information
 	datePattern := regexp.MustCompile(`Date of Test:\s*(\d{2})\.(\d{2})\.(\d{4})`)
 	namePattern := regexp.MustCompile(`Name of Person:\s*(\w+)`)
+	filePattern := regexp.MustCompile(`\.\d{3}`)
 
 	// Iterate over each file in the source directory
 	for _, file := range files {
-		// Check if the file is a .txt file
-		if !file.IsDir() && filepath.Ext(file.Name()) == ".585" {
+		// Check if the file is not a directory and has a 3 digit feliname ext
+		if !file.IsDir() && filePattern.Match([]byte(filepath.Ext(file.Name()))) {
 			// Read the contents of the file
 			content, err := ioutil.ReadFile(filepath.Join(srcPath, file.Name()))
 			if err != nil {
