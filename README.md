@@ -11,24 +11,49 @@ Usage:
   isokinexp [flags]
 
 Flags:
-  -d, --delete       delete source files from input directory.
-                     isokinexp will move files instead of copying
-  -h, --help         help for isokinexp
-  -i, --in string    path to import files from
-  -o, --out string   path to export files to
-  -v, --version      version for isokinexp
+  -d, --delete          delete source files from input directory.
+                          isokinexp will move files instead of copying
+  -f, --filter string   filter names (use * as placeholder)
+  -h, --help            help for isokinexp
+  -i, --in string       path to import files from
+  -o, --out string      path to export files to
+  -v, --version         version for isokinexp
 ```
 
-To import files from an input path to an output path:
+To copy files from an input path to an output path:
 
 ```
 isokinexp -i import/path -o output/path
 ```
 
-to also delete the source files you can use the -d or --delete option
+To also delete the source files you can use the -d or --delete option:
 
 ```
 isokinexp -d -i import/path -o output/path
+```
+
+To filter the proband name you can use the --filter / -f Option. For an exact match of the name use:
+
+```
+isokinexp -i import/path -o output/path -f XYZ4711
+```
+
+Use the * / asterisk as a placeholder. Filter for all names starting with XYZ use:
+
+```
+isokinexp -i import/path -o output/path -f XYZ*
+```
+
+To filter for all names containing XYZ somewhere in the name use:
+
+```
+isokinexp -i import/path -o output/path -f *XYZ*
+```
+
+Use * wherever needed. Example:
+
+```
+isokinexp -i import/path -o output/path -f *XYZ*00*287
 ```
 
 # Installation
