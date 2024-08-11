@@ -17,6 +17,7 @@ var (
 	srcPath  string
 	destPath string
 	moveFile bool
+	filter   string
 
 	rootCmd = &cobra.Command{
 		Use:     "isokinexp",
@@ -70,7 +71,12 @@ func copy() {
 	// Define regular expression patterns to match the filename and date information
 	datePattern := regexp.MustCompile(`Date of Test:\s*(\d{2})\.(\d{2})\.(\d{4})`)
 	namePattern := regexp.MustCompile(`Name of Person:\s*(\w+)`)
+	if filter != "" {
+		fmt.Printf("Filter names by: %s\n", filter)
+	}
+	filterPattern := regexp.MustCompile(`^` + strings.Replace(filter, "*", ".*", -1) + `$`)
 	filePattern := regexp.MustCompile(`\.\d{3}`)
+	fmt.Printf("\n")
 
 	// Iterate over each file in the source directory
 	for _, file := range files {
@@ -99,6 +105,11 @@ func copy() {
 
 			if name == "" || date == "" {
 				fmt.Printf("File %s does not contain valid name and date information\n", file.Name())
+				continue
+			}
+
+			if filter != "" && !filterPattern.Match([]byte(name)) {
+				fmt.Printf("File %s skipped '%s' does not match '%s'\n", file.Name(), name, filter)
 				continue
 			}
 
@@ -157,6 +168,7 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().StringVarP(&srcPath, "in", "i", "", "path to import files from")
 	rootCmd.Flags().StringVarP(&destPath, "out", "o", "", "path to export files to")
+	rootCmd.Flags().StringVarP(&filter, "filter", "f", "", "filter names (use * as placeholder)")
 	rootCmd.Flags().BoolVarP(&moveFile, "delete", "d", false, `delete source files from input directory.
 isokinexp will move files instead of copying`)
 
