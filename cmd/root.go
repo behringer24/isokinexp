@@ -22,7 +22,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:     "isokinexp",
 		Short:   "Exporter / renamer for isokinetic device files",
-		Version: "0.1.0",
+		Version: "0.2.0",
 		Long:    `isokinexp is a command to import export files from isokinetic measureing devices.`,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
