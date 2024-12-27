@@ -70,7 +70,9 @@ func copy() {
 
 	// Define regular expression patterns to match the filename and date information
 	datePattern := regexp.MustCompile(`Date of Test:\s*(\d{2})\.(\d{2})\.(\d{4})`)
+	timePattern := regexp.MustCompile(`Time of Test:\s*(\d{2}\:\d{2})`)
 	namePattern := regexp.MustCompile(`Name of Person:\s*(\w+)`)
+
 	if filter != "" {
 		fmt.Printf("Filter names by: %s\n", filter)
 	}
@@ -90,7 +92,7 @@ func copy() {
 			}
 
 			// Extract the filename and date information from the contents of the file
-			var name, date string
+			var name, date, time string
 			for _, line := range strings.Split(string(content), "\n") {
 				if matches := datePattern.FindStringSubmatch(line); len(matches) > 1 {
 					date = matches[3] + "-" + matches[2] + "-" + matches[1]
@@ -98,13 +100,16 @@ func copy() {
 				if matches := namePattern.FindStringSubmatch(line); len(matches) > 1 {
 					name = matches[1]
 				}
+				if matches := timePattern.FindStringSubmatch(line); len(matches) > 1 {
+					time = matches[1]
+				}
 				if name != "" && date != "" {
 					break
 				}
 			}
 
-			if name == "" || date == "" {
-				fmt.Printf("File %s does not contain valid name and date information\n", file.Name())
+			if name == "" || date == "" || time == "" {
+				fmt.Printf("File %s does not contain valid name, date and time information\n", file.Name())
 				continue
 			}
 
@@ -122,7 +127,7 @@ func copy() {
 			}
 
 			// Rename and move the file to the destination directory
-			newName := filepath.Join(destSubdir, fmt.Sprintf("%s_%s.txt", name, date))
+			newName := filepath.Join(destSubdir, fmt.Sprintf("%s_%s-%s.txt", name, date, time))
 
 			if moveFile {
 				err = os.Rename(filepath.Join(srcPath, file.Name()), newName)
