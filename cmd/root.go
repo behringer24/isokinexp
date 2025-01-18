@@ -22,7 +22,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:     "isokinexp",
 		Short:   "Exporter / renamer for isokinetic device files",
-		Version: "0.2.0",
+		Version: "0.2.1",
 		Long:    `isokinexp is a command to import export files from isokinetic measureing devices.`,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
@@ -101,7 +101,7 @@ func copy() {
 					name = matches[1]
 				}
 				if matches := timePattern.FindStringSubmatch(line); len(matches) > 1 {
-					time = matches[1]
+					time = strings.Replace(matches[1], ":", "-", 1)
 				}
 				if name != "" && date != "" {
 					break
