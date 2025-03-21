@@ -22,7 +22,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:     "isokinexp",
 		Short:   "Exporter / renamer for isokinetic device files",
-		Version: "0.2.1",
+		Version: "0.2.3",
 		Long:    `isokinexp is a command to import export files from isokinetic measureing devices.`,
 		// Uncomment the following line if your bare application
 		// has an action associated with it:
@@ -51,6 +51,18 @@ func copyFile(src, dst string) error {
 	}
 
 	return nil
+}
+
+func fileExists(path string) bool {
+	if _, err := os.Stat(path); err == nil {
+		return true
+	} else if os.IsNotExist(err) {
+		return false
+	} else {
+		fmt.Printf("Error checking file %s, %s\n", path, err)
+		os.Exit(1)
+	}
+	return false
 }
 
 func copy() {
@@ -126,13 +138,21 @@ func copy() {
 				continue
 			}
 
-			// Rename and move the file to the destination directory
-			newName := filepath.Join(destSubdir, fmt.Sprintf("%s_%s-%s.txt", name, date, time))
+			// Check if file exists
+			var newName string
+			var number int
+			var filexists bool
+			for ok := true; ok; ok = (filexists) {
+				newName = filepath.Join(destSubdir, fmt.Sprintf("%s_%s-%s-%d.txt", name, date, time, number))
+				filexists = fileExists(newName)
+				number++
+			}
 
+			// Rename and move the file to the destination directory
 			if moveFile {
 				err = os.Rename(filepath.Join(srcPath, file.Name()), newName)
 				if err != nil {
-					fmt.Printf("Error moving file %s: %v\n", file.Name(), err)
+					fmt.Printf("Error moving file %s to %s: %v\n", file.Name(), newName, err)
 					continue
 				}
 				fmt.Printf("File %s moved to %s\n", file.Name(), newName)
@@ -140,7 +160,7 @@ func copy() {
 			} else {
 				err = copyFile(filepath.Join(srcPath, file.Name()), newName)
 				if err != nil {
-					fmt.Printf("Error copying file %s: %v\n", file.Name(), err)
+					fmt.Printf("Error copying file %s to %s: %v\n", file.Name(), newName, err)
 					continue
 				}
 				fmt.Printf("File %s copied to %s\n", file.Name(), newName)
